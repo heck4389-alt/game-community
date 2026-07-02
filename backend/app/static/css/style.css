@@ -377,6 +377,11 @@ a:hover {
   margin-bottom: 0.75rem;
 }
 
+.meta .author-admin {
+  color: var(--accent);
+  font-weight: 600;
+}
+
 .preview {
   color: #cbd5e1;
   font-size: 0.95rem;

@@ -7,6 +7,7 @@ from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.config import settings
+from app.display import display_author
 from app.routers import admin, auth, board
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -24,6 +25,7 @@ app.add_middleware(
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 templates.env.globals["site_name"] = settings.site_name
 templates.env.globals["site_tagline"] = settings.site_tagline
+templates.env.globals["display_author"] = display_author
 app.state.templates = templates
 
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")

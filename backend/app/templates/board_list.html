@@ -35,7 +35,7 @@
         </div>
         <h2><a href="/board/{{ post.id }}">{{ post.title }}</a></h2>
         <p class="meta">
-          {{ post.author.username }} · {{ post.created_at.strftime('%Y-%m-%d %H:%M') }}
+          <span class="{% if post.author.is_admin %}author-admin{% endif %}">{{ display_author(post.author) }}</span> · {{ post.created_at.strftime('%Y-%m-%d %H:%M') }}
         </p>
         <p class="preview">{{ post.content[:120] }}{% if post.content|length > 120 %}...{% endif %}</p>
       </article>

@@ -8,7 +8,7 @@
     <span class="category-badge large">{{ post.category.icon }} {{ post.category.name }}</span>
     <h1>{{ post.title }}</h1>
     <p class="meta">
-      {{ post.author.username }} · {{ post.created_at.strftime('%Y-%m-%d %H:%M') }}
+      <span class="{% if post.author.is_admin %}author-admin{% endif %}">{{ display_author(post.author) }}</span> · {{ post.created_at.strftime('%Y-%m-%d %H:%M') }}
     </p>
   </header>
 
@@ -37,7 +37,7 @@
       {% for comment in post.comments %}
         <article class="comment-card">
           <div class="comment-header">
-            <strong>{{ comment.author.username }}</strong>
+            <strong class="{% if comment.author.is_admin %}author-admin{% endif %}">{{ display_author(comment.author) }}</strong>
             <span>{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
           </div>
           <p class="comment-content">{{ comment.content }}</p>
