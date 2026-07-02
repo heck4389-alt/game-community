@@ -5,6 +5,7 @@ from sqlalchemy.orm import selectinload
 
 from app.dependencies import CurrentUser, DbSession
 from app.models import Category, Comment, Post
+from app.permissions import can_manage_comment, can_manage_post
 
 router = APIRouter(prefix="/board", tags=["board"])
 
@@ -167,7 +168,7 @@ def delete_comment(
         return RedirectResponse("/login", status_code=status.HTTP_303_SEE_OTHER)
 
     comment = db.get(Comment, comment_id)
-    if comment and comment.author_id == current_user.id:
+    if comment and can_manage_comment(current_user, comment):
         db.delete(comment)
         db.commit()
     return RedirectResponse(f"/board/{post_id}", status_code=status.HTTP_303_SEE_OTHER)
@@ -179,7 +180,7 @@ def edit_post_page(request: Request, post_id: int, db: DbSession, current_user: 
         return RedirectResponse("/login", status_code=status.HTTP_303_SEE_OTHER)
 
     post = db.get(Post, post_id)
-    if not post or post.author_id != current_user.id:
+    if not post or not can_manage_post(current_user, post):
         return RedirectResponse("/board", status_code=status.HTTP_303_SEE_OTHER)
 
     return render_form(
@@ -207,7 +208,7 @@ def update_post(
 
     post = db.get(Post, post_id)
     categories = get_categories(db)
-    if not post or post.author_id != current_user.id:
+    if not post or not can_manage_post(current_user, post):
         return RedirectResponse("/board", status_code=status.HTTP_303_SEE_OTHER)
 
     title = title.strip()
@@ -241,7 +242,7 @@ def delete_post(request: Request, post_id: int, db: DbSession, current_user: Cur
         return RedirectResponse("/login", status_code=status.HTTP_303_SEE_OTHER)
 
     post = db.get(Post, post_id)
-    if post and post.author_id == current_user.id:
+    if post and can_manage_post(current_user, post):
         db.delete(post)
         db.commit()
     return RedirectResponse("/board", status_code=status.HTTP_303_SEE_OTHER)

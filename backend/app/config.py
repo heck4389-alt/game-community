@@ -7,6 +7,7 @@ class Settings(BaseSettings):
 
     site_name: str = "게임프리 커뮤니티"
     site_tagline: str = "게임 정보와 팁을 함께 나누는 공간"
+    admin_usernames: str = "jeon6974"
 
     database_url: str = "postgresql+psycopg://boarduser:boardpass@localhost:5432/boarddb"
     secret_key: str = "dev-secret-key-change-in-production"

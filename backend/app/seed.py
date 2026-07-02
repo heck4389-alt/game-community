@@ -1,7 +1,8 @@
 from sqlalchemy import select
 
+from app.config import settings
 from app.database import SessionLocal
-from app.models import Category
+from app.models import Category, User
 
 DEFAULT_CATEGORIES = [
     {"name": "리그 오브 레전드", "slug": "lol", "icon": "⚔️", "sort_order": 1},
@@ -28,5 +29,30 @@ def seed_categories() -> None:
         db.close()
 
 
-if __name__ == "__main__":
+def promote_admins() -> None:
+    admin_names = [name.strip() for name in settings.admin_usernames.split(",") if name.strip()]
+    if not admin_names:
+        return
+
+    db = SessionLocal()
+    try:
+        users = db.scalars(select(User).where(User.username.in_(admin_names))).all()
+        changed = False
+        for user in users:
+            if not user.is_admin:
+                user.is_admin = True
+                changed = True
+        if changed:
+            db.commit()
+            print(f"Admin privileges granted: {', '.join(user.username for user in users)}")
+    finally:
+        db.close()
+
+
+def run_seed() -> None:
     seed_categories()
+    promote_admins()
+
+
+if __name__ == "__main__":
+    run_seed()

@@ -16,10 +16,10 @@
 
   <div class="form-actions">
     <a href="/board{% if post.category %}?category={{ post.category.slug }}{% endif %}" class="btn btn-secondary">목록</a>
-    {% if current_user and current_user.id == post.author_id %}
-      <a href="/board/{{ post.id }}/edit" class="btn btn-primary">수정</a>
+    {% if current_user and (current_user.id == post.author_id or current_user.is_admin) %}
+      <a href="/board/{{ post.id }}/edit" class="btn btn-primary">{% if current_user.is_admin and current_user.id != post.author_id %}관리자 수정{% else %}수정{% endif %}</a>
       <form action="/board/{{ post.id }}/delete" method="post" class="inline-form" onsubmit="return confirm('정말 삭제할까요?');">
-        <button type="submit" class="btn btn-danger">삭제</button>
+        <button type="submit" class="btn btn-danger">{% if current_user.is_admin and current_user.id != post.author_id %}관리자 삭제{% else %}삭제{% endif %}</button>
       </form>
     {% endif %}
   </div>
@@ -41,9 +41,9 @@
             <span>{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
           </div>
           <p class="comment-content">{{ comment.content }}</p>
-          {% if current_user and current_user.id == comment.author_id %}
+          {% if current_user and (current_user.id == comment.author_id or current_user.is_admin) %}
             <form action="/board/{{ post.id }}/comments/{{ comment.id }}/delete" method="post" class="inline-form" onsubmit="return confirm('댓글을 삭제할까요?');">
-              <button type="submit" class="btn btn-text">삭제</button>
+              <button type="submit" class="btn btn-text">{% if current_user.is_admin and current_user.id != comment.author_id %}관리자 삭제{% else %}삭제{% endif %}</button>
             </form>
           {% endif %}
         </article>

@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}관리자 - {{ site_name }}{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div>
+    <h1>관리자 페이지</h1>
+    <p class="page-subtitle">회원·게시글 현황을 확인하고 운영할 수 있습니다.</p>
+  </div>
+  <a href="/board" class="btn btn-secondary">게시판으로</a>
+</section>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <span class="stat-label">전체 회원</span>
+    <strong class="stat-value">{{ user_count }}</strong>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">오늘 가입</span>
+    <strong class="stat-value">{{ today_users }}</strong>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">전체 게시글</span>
+    <strong class="stat-value">{{ post_count }}</strong>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">오늘 게시글</span>
+    <strong class="stat-value">{{ today_posts }}</strong>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">전체 댓글</span>
+    <strong class="stat-value">{{ comment_count }}</strong>
+  </div>
+</div>
+
+<section class="admin-section">
+  <h2>최근 가입 회원</h2>
+  {% if recent_users %}
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>아이디</th>
+            <th>이메일</th>
+            <th>관리자</th>
+            <th>가입일</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in recent_users %}
+            <tr>
+              <td>{{ user.username }}</td>
+              <td>{{ user.email }}</td>
+              <td>{% if user.is_admin %}✅{% else %}-{% endif %}</td>
+              <td>{{ user.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="comment-empty">가입한 회원이 없습니다.</p>
+  {% endif %}
+</section>
+
+<section class="admin-section">
+  <h2>최근 게시글</h2>
+  {% if recent_posts %}
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>제목</th>
+            <th>작성자</th>
+            <th>카테고리</th>
+            <th>작성일</th>
+            <th>관리</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for post in recent_posts %}
+            <tr>
+              <td><a href="/board/{{ post.id }}">{{ post.title }}</a></td>
+              <td>{{ post.author.username }}</td>
+              <td>{{ post.category.icon }} {{ post.category.name }}</td>
+              <td>{{ post.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+              <td>
+                <a href="/board/{{ post.id }}/edit" class="btn btn-text">수정</a>
+                <form action="/board/{{ post.id }}/delete" method="post" class="inline-form" onsubmit="return confirm('게시글을 삭제할까요?');">
+                  <button type="submit" class="btn btn-text danger">삭제</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="comment-empty">게시글이 없습니다.</p>
+  {% endif %}
+</section>
+{% endblock %}

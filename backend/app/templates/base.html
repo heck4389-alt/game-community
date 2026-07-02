@@ -18,7 +18,13 @@
       </a>
       <nav class="nav">
         {% if current_user %}
-          <span class="welcome">{{ current_user.username }}님</span>
+          {% if current_user.is_admin %}
+            <a href="/admin" class="btn btn-admin">관리자</a>
+          {% endif %}
+          <span class="welcome">
+            {{ current_user.username }}님
+            {% if current_user.is_admin %}<span class="admin-badge">ADMIN</span>{% endif %}
+          </span>
           <form action="/logout" method="post" class="inline-form">
             <button type="submit" class="btn btn-secondary">로그아웃</button>
           </form>
