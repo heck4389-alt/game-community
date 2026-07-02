@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}{{ site_name }} - 홈{% endblock %}
+{% block body_class %}portal-home{% endblock %}
+{% block main_class %}portal-main{% endblock %}
+
+{% block content %}
+<div class="portal-grid">
+  <!-- LEFT SIDEBAR -->
+  <aside class="portal-sidebar left">
+    <section class="portal-card" id="ranking">
+      <div class="card-head">
+        <h2>🔥 실시간 인기 게임</h2>
+        <span class="card-sub">최근 24시간 · 내부 데이터</span>
+      </div>
+      {% if popular_games %}
+        <ol class="rank-list">
+          {% for item in popular_games %}
+            <li>
+              <span class="rank-num">{{ loop.index }}</span>
+              <a href="/board?category={{ item.category.slug }}" class="rank-link">
+                <span>{{ item.category.icon }} {{ item.category.name }}</span>
+              </a>
+              <span class="rank-score" title="글 {{ item.posts_24h }} · 댓글 {{ item.comments_24h }} · 조회 {{ item.views_24h }} · 검색 {{ item.searches_24h }}">
+                {{ item.score|int }}
+              </span>
+            </li>
+          {% endfor %}
+        </ol>
+      {% else %}
+        <p class="empty-text">아직 집계 데이터가 없습니다. 글·검색 활동이 쌓이면 표시됩니다.</p>
+      {% endif %}
+      <a href="/board" class="card-link">전체 게임 보기 →</a>
+    </section>
+
+    <section class="portal-card promo-mini">
+      <h3>커뮤니티 활동하고<br>정보를 나눠보세요!</h3>
+      <a href="/board/new" class="btn btn-primary btn-block">글쓰기</a>
+    </section>
+
+    <section class="portal-card">
+      <div class="card-head"><h2>📊 오늘의 통계</h2></div>
+      <ul class="stats-list">
+        <li><span>가입자</span><strong>{{ today_stats.today_users }}</strong></li>
+        <li><span>작성 글</span><strong>{{ today_stats.today_posts }}</strong></li>
+        <li><span>작성 댓글</span><strong>{{ today_stats.today_comments }}</strong></li>
+        <li><span>순 방문자</span><strong>{{ today_stats.today_visitors }}</strong></li>
+      </ul>
+    </section>
+  </aside>
+
+  <!-- CENTER -->
+  <div class="portal-center">
+    {% if banners %}
+      <section class="hero-banner {{ banners[0].gradient_class }}">
+        <div class="hero-content">
+          <h1>{{ banners[0].title }}</h1>
+          <p>{{ banners[0].subtitle }}</p>
+          <a href="{{ banners[0].link_url }}" class="btn btn-primary">{{ banners[0].button_text }}</a>
+        </div>
+        {% if banners|length > 1 %}
+          <div class="hero-dots">
+            {% for banner in banners %}
+              <span class="{% if loop.first %}active{% endif %}"></span>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </section>
+    {% endif %}
+
+    <section class="portal-card">
+      <div class="card-head row">
+        <h2>🔥 HOT 게시글</h2>
+        <div class="tab-row">
+          <a href="/?tab=all" class="tab {% if hot_tab == 'all' %}active{% endif %}">전체</a>
+          <a href="/?tab=popular" class="tab {% if hot_tab == 'popular' %}active{% endif %}">인기</a>
+          <a href="/?tab=latest" class="tab {% if hot_tab == 'latest' %}active{% endif %}">최신</a>
+          <a href="/?tab=comments" class="tab {% if hot_tab == 'comments' %}active{% endif %}">댓글</a>
+        </div>
+      </div>
+      {% if hot_posts %}
+        <ul class="hot-list">
+          {% for item in hot_posts %}
+            <li>
+              <span class="badge">{{ item.post.category.name }}</span>
+              <a href="/board/{{ item.post.id }}" class="hot-title">{{ item.post.title }}</a>
+              <span class="hot-meta">
+                {{ display_author(item.post.author) }} · 💬 {{ item.comment_count }} · 👁 {{ item.view_count }}
+              </span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="empty-text">아직 HOT 게시글이 없습니다. <a href="/board/new">첫 글 작성하기</a></p>
+      {% endif %}
+    </section>
+
+    <section class="portal-card" id="news">
+      <div class="card-head"><h2>📰 게임 뉴스</h2></div>
+      {% if news_articles %}
+        <ul class="news-list">
+          {% for news in news_articles %}
+            <li>
+              <div>
+                <strong>{{ news.title }}</strong>
+                <p>{{ news.summary }}</p>
+                <span class="news-meta">{{ news.source }} · {{ news.created_at.strftime('%Y-%m-%d') }}</span>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="empty-text">뉴스가 없습니다.</p>
+      {% endif %}
+    </section>
+
+    <section class="portal-card">
+      <div class="card-head"><h2>⭐ 오늘의 추천 공략</h2></div>
+      {% if recommended_guides %}
+        <div class="guide-grid">
+          {% for item in recommended_guides %}
+            <a href="/board/{{ item.post.id }}" class="guide-card">
+              <span class="guide-cat">{{ item.post.category.icon }} {{ item.post.category.name }}</span>
+              <h3>{{ item.post.title }}</h3>
+              <p>{{ item.post.content[:80] }}{% if item.post.content|length > 80 %}...{% endif %}</p>
+              <span class="guide-meta">👁 {{ item.view_count }} · 💬 {{ item.comment_count }}</span>
+            </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="empty-text">추천 공략이 없습니다. 조회·댓글이 많은 글이 자동 추천됩니다.</p>
+      {% endif %}
+    </section>
+
+    <section class="portal-card">
+      <div class="card-head"><h2>💬 최근 댓글</h2></div>
+      {% if recent_comments %}
+        <ul class="comment-feed">
+          {% for comment in recent_comments %}
+            <li>
+              <strong>{{ display_author(comment.author) }}</strong>
+              <span>{{ comment.created_at.strftime('%m-%d %H:%M') }}</span>
+              <p>{{ comment.content[:100] }}{% if comment.content|length > 100 %}...{% endif %}</p>
+              <a href="/board/{{ comment.post_id }}">↳ {{ comment.post.title }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="empty-text">최근 댓글이 없습니다.</p>
+      {% endif %}
+    </section>
+  </div>
+
+  <!-- RIGHT SIDEBAR -->
+  <aside class="portal-sidebar right">
+    <section class="portal-card">
+      <div class="card-head">
+        <h2>🔍 실시간 인기 검색어</h2>
+        <span class="card-sub">최근 24시간</span>
+      </div>
+      {% if popular_searches %}
+        <ol class="search-rank">
+          {% for term, count in popular_searches %}
+            <li>
+              <span class="rank-num">{{ loop.index }}</span>
+              <a href="/search?q={{ term }}">{{ term }}</a>
+              <span class="rank-score">{{ count }}</span>
+            </li>
+          {% endfor %}
+        </ol>
+      {% else %}
+        <p class="empty-text">검색 기록이 없습니다. 상단 검색창을 이용해 보세요.</p>
+      {% endif %}
+    </section>
+
+    <section class="portal-card">
+      <div class="card-head"><h2>📢 공지사항</h2></div>
+      {% if announcements %}
+        <ul class="notice-list">
+          {% for notice in announcements %}
+            <li>
+              <a href="/board">{{ notice.title }}</a>
+              <span>{{ notice.created_at.strftime('%m.%d') }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="empty-text">공지사항이 없습니다.</p>
+      {% endif %}
+    </section>
+
+    <section class="portal-card">
+      <div class="card-head"><h2>👋 신규 가입자</h2></div>
+      {% if recent_users %}
+        <ul class="user-list">
+          {% for user in recent_users %}
+            <li>
+              <span class="avatar">{{ user.username[0]|upper }}</span>
+              <span>{{ user.username }}</span>
+              <span class="time">{{ user.created_at.strftime('%m-%d') }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="empty-text">가입자가 없습니다.</p>
+      {% endif %}
+    </section>
+
+    <section class="portal-card event-card" id="events">
+      {% if events %}
+        {% for event in events %}
+          <div class="event-item">
+            <h3>🎁 {{ event.title }}</h3>
+            <p>{{ event.description }}</p>
+            <a href="{{ event.link_url }}" class="btn btn-primary btn-sm">참여하기</a>
+          </div>
+        {% endfor %}
+      {% endif %}
+    </section>
+  </aside>
+</div>
+{% endblock %}

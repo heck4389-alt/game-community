@@ -5,38 +5,52 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}{{ site_name }}{% endblock %}</title>
   <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/home.css">
+  {% block extra_css %}{% endblock %}
 </head>
-<body>
-  <header class="header">
-    <div class="container header-inner">
-      <a href="/board" class="logo">
-        <span class="logo-icon">🎮</span>
-        <span class="logo-text">
-          <strong>{{ site_name }}</strong>
-          <small>{{ site_tagline }}</small>
-        </span>
+<body class="{% block body_class %}{% endblock %}">
+  <header class="portal-header">
+    <div class="portal-header-inner">
+      <a href="/" class="portal-logo">
+        <span class="portal-logo-mark">G</span>
+        <span>GAMEPRY</span>
       </a>
-      <nav class="nav">
+
+      <nav class="portal-nav">
+        <a href="/" class="portal-nav-link">홈</a>
+        <a href="/board" class="portal-nav-link">게임</a>
+        <a href="/board" class="portal-nav-link">커뮤니티</a>
+        <a href="/#news" class="portal-nav-link">뉴스</a>
+        <a href="/#ranking" class="portal-nav-link">랭킹</a>
+        <a href="/#events" class="portal-nav-link">이벤트</a>
+      </nav>
+
+      <form action="/search" method="get" class="portal-search">
+        <input type="search" name="q" placeholder="게임, 게시글 검색..." aria-label="검색">
+        <button type="submit">🔍</button>
+      </form>
+
+      <div class="portal-user">
         {% if current_user %}
           {% if current_user.is_admin %}
             <a href="/admin" class="btn btn-admin">관리자</a>
           {% endif %}
-          <span class="welcome">
-            {{ current_user.username }}님
+          <span class="portal-username">
+            {{ current_user.username }}
             {% if current_user.is_admin %}<span class="admin-badge">ADMIN</span>{% endif %}
           </span>
           <form action="/logout" method="post" class="inline-form">
-            <button type="submit" class="btn btn-secondary">로그아웃</button>
+            <button type="submit" class="btn btn-secondary btn-sm">로그아웃</button>
           </form>
         {% else %}
-          <a href="/login" class="btn btn-secondary">로그인</a>
-          <a href="/register" class="btn btn-primary">회원가입</a>
+          <a href="/login" class="btn btn-secondary btn-sm">로그인</a>
+          <a href="/register" class="btn btn-primary btn-sm">회원가입</a>
         {% endif %}
-      </nav>
+      </div>
     </div>
   </header>
 
-  <main class="container main">
+  <main class="{% block main_class %}container main{% endblock %}">
     {% block content %}{% endblock %}
   </main>
 

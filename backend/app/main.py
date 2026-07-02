@@ -1,14 +1,13 @@
 from pathlib import Path
 
-from fastapi import FastAPI, Request
-from fastapi.responses import RedirectResponse
+from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.config import settings
 from app.display import display_author
-from app.routers import admin, auth, board
+from app.routers import admin, auth, board, home, search
 from app.visitor_tracking import VisitorTrackingMiddleware
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -32,14 +31,11 @@ app.state.templates = templates
 
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
 
+app.include_router(home.router)
+app.include_router(search.router)
 app.include_router(auth.router)
 app.include_router(board.router)
 app.include_router(admin.router)
-
-
-@app.get("/")
-def home():
-    return RedirectResponse("/board")
 
 
 @app.get("/health")

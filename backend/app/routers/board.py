@@ -3,9 +3,11 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
+from app.config import settings
 from app.dependencies import CurrentUser, DbSession
 from app.models import Category, Comment, Post
 from app.permissions import can_manage_comment, can_manage_post
+from app.services.tracking import record_post_view
 
 router = APIRouter(prefix="/board", tags=["board"])
 
@@ -112,6 +114,10 @@ def post_detail(request: Request, post_id: int, db: DbSession, current_user: Cur
     )
     if not post:
         return RedirectResponse("/board", status_code=status.HTTP_303_SEE_OTHER)
+
+    visitor_key = request.cookies.get(settings.visitor_cookie_name)
+    record_post_view(db, post.id, visitor_key)
+
     return request.app.state.templates.TemplateResponse(
         request,
         "post_detail.html",

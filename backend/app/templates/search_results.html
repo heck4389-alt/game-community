@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}검색: {{ query }} - {{ site_name }}{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div>
+    <h1>검색 결과</h1>
+    <p class="page-subtitle">"{{ query }}" 검색 · {{ posts|length }}건</p>
+  </div>
+  <a href="/" class="btn btn-secondary">홈으로</a>
+</section>
+
+{% if posts %}
+  <div class="post-list">
+    {% for post in posts %}
+      <article class="post-card">
+        <span class="category-badge">{{ post.category.icon }} {{ post.category.name }}</span>
+        <h2><a href="/board/{{ post.id }}">{{ post.title }}</a></h2>
+        <p class="meta">
+          {{ display_author(post.author) }} · {{ post.created_at.strftime('%Y-%m-%d %H:%M') }}
+        </p>
+        <p class="preview">{{ post.content[:120] }}{% if post.content|length > 120 %}...{% endif %}</p>
+      </article>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="empty-state">
+    <p>검색 결과가 없습니다.</p>
+    <a href="/board" class="btn btn-primary">게시판으로</a>
+  </div>
+{% endif %}
+{% endblock %}
