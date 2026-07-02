@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}{{ post.title if post else '글쓰기' }}{% endblock %}
+
+{% block content %}
+<section class="auth-card wide">
+  <h1>{% if action == 'edit' %}글 수정{% else %}글쓰기{% endif %}</h1>
+
+  {% if error %}
+    <div class="alert alert-error">{{ error }}</div>
+  {% endif %}
+
+  <form
+    method="post"
+    action="{% if action == 'edit' %}/board/{{ post.id }}/edit{% else %}/board/new{% endif %}"
+    class="form"
+  >
+    <label for="title">제목</label>
+    <input
+      type="text"
+      id="title"
+      name="title"
+      value="{{ title if title is defined else (post.title if post else '') }}"
+      maxlength="200"
+      required
+    >
+
+    <label for="content">내용</label>
+    <textarea id="content" name="content" rows="10" required>{{ content if content is defined else (post.content if post else '') }}</textarea>
+
+    <div class="form-actions">
+      <a href="{% if post %}/board/{{ post.id }}{% else %}/board{% endif %}" class="btn btn-secondary">취소</a>
+      <button type="submit" class="btn btn-primary">{% if action == 'edit' %}수정하기{% else %}등록하기{% endif %}</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

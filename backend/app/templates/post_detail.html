@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block content %}
+<article class="post-detail">
+  <header>
+    <h1>{{ post.title }}</h1>
+    <p class="meta">
+      {{ post.author.username }} · {{ post.created_at.strftime('%Y-%m-%d %H:%M') }}
+    </p>
+  </header>
+
+  <div class="post-content">{{ post.content }}</div>
+
+  <div class="form-actions">
+    <a href="/board" class="btn btn-secondary">목록</a>
+    {% if current_user and current_user.id == post.author_id %}
+      <a href="/board/{{ post.id }}/edit" class="btn btn-primary">수정</a>
+      <form action="/board/{{ post.id }}/delete" method="post" class="inline-form" onsubmit="return confirm('정말 삭제할까요?');">
+        <button type="submit" class="btn btn-danger">삭제</button>
+      </form>
+    {% endif %}
+  </div>
+</article>
+{% endblock %}
