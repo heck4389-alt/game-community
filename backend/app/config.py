@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
-    site_name: str = "돈만이 게임 커뮤니티"
+    site_name: str = "게임프리 커뮤니티"
     site_tagline: str = "게임 정보와 팁을 함께 나누는 공간"
 
     database_url: str = "postgresql+psycopg://boarduser:boardpass@localhost:5432/boarddb"
