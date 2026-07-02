@@ -3,13 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}게시판{% endblock %}</title>
+  <title>{% block title %}{{ site_name }}{% endblock %}</title>
   <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
   <header class="header">
     <div class="container header-inner">
-      <a href="/board" class="logo">돈만이 게시판</a>
+      <a href="/board" class="logo">
+        <span class="logo-icon">🎮</span>
+        <span class="logo-text">
+          <strong>{{ site_name }}</strong>
+          <small>{{ site_tagline }}</small>
+        </span>
+      </a>
       <nav class="nav">
         {% if current_user %}
           <span class="welcome">{{ current_user.username }}님</span>
@@ -30,7 +36,7 @@
 
   <footer class="footer">
     <div class="container">
-      <p>FastAPI + PostgreSQL + Docker</p>
+      <p>{{ site_name }} · 게임 정보를 함께 나누는 커뮤니티</p>
     </div>
   </footer>
 </body>

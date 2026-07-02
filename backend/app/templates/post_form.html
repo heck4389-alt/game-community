@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ post.title if post else '글쓰기' }}{% endblock %}
+{% block title %}{% if post %}{{ post.title }}{% else %}글쓰기{% endif %} - {{ site_name }}{% endblock %}
 
 {% block content %}
 <section class="auth-card wide">
@@ -15,6 +15,20 @@
     action="{% if action == 'edit' %}/board/{{ post.id }}/edit{% else %}/board/new{% endif %}"
     class="form"
   >
+    <label for="category_id">게임 카테고리</label>
+    <select id="category_id" name="category_id" required>
+      {% for cat in categories %}
+        <option
+          value="{{ cat.id }}"
+          {% if selected_category_id is defined and selected_category_id == cat.id %}selected
+          {% elif post and post.category_id == cat.id %}selected
+          {% elif not post and not selected_category_id is defined and cat.slug == 'free' %}selected{% endif %}
+        >
+          {{ cat.icon }} {{ cat.name }}
+        </option>
+      {% endfor %}
+    </select>
+
     <label for="title">제목</label>
     <input
       type="text"
@@ -22,11 +36,12 @@
       name="title"
       value="{{ title if title is defined else (post.title if post else '') }}"
       maxlength="200"
+      placeholder="예: 발로란트 제트 공략"
       required
     >
 
     <label for="content">내용</label>
-    <textarea id="content" name="content" rows="10" required>{{ content if content is defined else (post.content if post else '') }}</textarea>
+    <textarea id="content" name="content" rows="10" placeholder="공략, 질문, 팁을 자유롭게 작성해 주세요." required>{{ content if content is defined else (post.content if post else '') }}</textarea>
 
     <div class="form-actions">
       <a href="{% if post %}/board/{{ post.id }}{% else %}/board{% endif %}" class="btn btn-secondary">취소</a>

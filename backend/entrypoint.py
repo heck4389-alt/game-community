@@ -10,6 +10,9 @@ def main() -> None:
     print("Running migrations...")
     subprocess.run(["alembic", "upgrade", "head"], check=True)
 
+    print("Seeding default data...")
+    subprocess.run([sys.executable, "-m", "app.seed"], check=True)
+
     port = os.environ.get("PORT", "8000")
     print(f"Starting server on port {port}...")
     os.execvp(

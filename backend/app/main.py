@@ -11,7 +11,7 @@ from app.routers import auth, board
 
 BASE_DIR = Path(__file__).resolve().parent
 
-app = FastAPI(title="Board App", debug=settings.debug)
+app = FastAPI(title=settings.site_name, debug=settings.debug)
 
 app.add_middleware(
     SessionMiddleware,
@@ -22,6 +22,8 @@ app.add_middleware(
 )
 
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
+templates.env.globals["site_name"] = settings.site_name
+templates.env.globals["site_tagline"] = settings.site_tagline
 app.state.templates = templates
 
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")

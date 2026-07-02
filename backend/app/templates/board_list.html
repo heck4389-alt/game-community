@@ -1,19 +1,38 @@
 {% extends "base.html" %}
 
-{% block title %}게시판 목록{% endblock %}
+{% block title %}게시판 - {{ site_name }}{% endblock %}
 
 {% block content %}
 <section class="page-header">
-  <h1>게시판</h1>
+  <div>
+    <h1>게시판</h1>
+    <p class="page-subtitle">궁금한 것, 공략, 팁을 카테고리별로 나눠 올려보세요.</p>
+  </div>
   {% if current_user %}
     <a href="/board/new" class="btn btn-primary">글쓰기</a>
   {% endif %}
 </section>
 
+<nav class="category-nav">
+  <a href="/board" class="category-pill {% if not active_category %}active{% endif %}">전체</a>
+  {% for cat in categories %}
+    <a
+      href="/board?category={{ cat.slug }}"
+      class="category-pill {% if active_category and active_category.id == cat.id %}active{% endif %}"
+    >
+      {{ cat.icon }} {{ cat.name }}
+    </a>
+  {% endfor %}
+</nav>
+
 {% if posts %}
   <div class="post-list">
     {% for post in posts %}
       <article class="post-card">
+        <div class="post-card-top">
+          <span class="category-badge">{{ post.category.icon }} {{ post.category.name }}</span>
+          <span class="comment-count">💬 {{ post.comments|length }}</span>
+        </div>
         <h2><a href="/board/{{ post.id }}">{{ post.title }}</a></h2>
         <p class="meta">
           {{ post.author.username }} · {{ post.created_at.strftime('%Y-%m-%d %H:%M') }}
@@ -24,7 +43,7 @@
   </div>
 {% else %}
   <div class="empty-state">
-    <p>아직 게시글이 없습니다.</p>
+    <p>{% if active_category %}{{ active_category.name }}에 아직 글이 없습니다.{% else %}아직 게시글이 없습니다.{% endif %}</p>
     {% if current_user %}
       <a href="/board/new" class="btn btn-primary">첫 글 작성하기</a>
     {% else %}
