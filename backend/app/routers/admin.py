@@ -8,6 +8,7 @@ from sqlalchemy.types import Date
 
 from app.dependencies import CurrentUser, DbSession
 from app.models import Comment, Post, User
+from app.visitor_stats import get_visitor_stats
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -27,6 +28,7 @@ def admin_dashboard(request: Request, db: DbSession, current_user: CurrentUser):
     today_users = db.scalar(
         select(func.count(User.id)).where(cast(User.created_at, Date) == today)
     ) or 0
+    today_visitors, total_visitors = get_visitor_stats()
 
     recent_users = list(db.scalars(select(User).order_by(User.created_at.desc()).limit(10)).all())
     recent_posts = list(
@@ -48,6 +50,8 @@ def admin_dashboard(request: Request, db: DbSession, current_user: CurrentUser):
             "comment_count": comment_count,
             "today_posts": today_posts,
             "today_users": today_users,
+            "today_visitors": today_visitors,
+            "total_visitors": total_visitors,
             "recent_users": recent_users,
             "recent_posts": recent_posts,
         },

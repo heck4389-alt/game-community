@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     debug: bool = True
     session_cookie_name: str = "board_session"
     session_max_age: int = 60 * 60 * 24 * 7  # 7 days
+    visitor_cookie_name: str = "gf_visitor_id"
+    visitor_cookie_max_age: int = 60 * 60 * 24 * 365  # 1 year
 
     @field_validator("database_url", mode="before")
     @classmethod

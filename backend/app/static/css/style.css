@@ -259,6 +259,29 @@ a:hover {
   color: var(--accent);
 }
 
+.stat-card.highlight {
+  border-color: rgba(34, 211, 238, 0.45);
+  background: linear-gradient(180deg, rgba(34, 211, 238, 0.08), var(--bg-card));
+}
+
+.stat-note {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.admin-note {
+  margin-bottom: 1.5rem;
+  padding: 0.9rem 1rem;
+  border-radius: 8px;
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  color: #c7d2fe;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
 .admin-section {
   background: var(--bg-card);
   border: 1px solid var(--border);

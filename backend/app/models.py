@@ -1,6 +1,6 @@
-from datetime import datetime
+from datetime import date, datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, func
+from sqlalchemy import Date, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -63,3 +63,13 @@ class Comment(Base):
 
     post: Mapped["Post"] = relationship(back_populates="comments")
     author: Mapped["User"] = relationship(back_populates="comments")
+
+
+class UniqueVisit(Base):
+    __tablename__ = "unique_visits"
+    __table_args__ = (UniqueConstraint("visitor_key", "visit_date", name="uq_visitor_day"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    visitor_key: Mapped[str] = mapped_column(String(36), index=True)
+    visit_date: Mapped[date] = mapped_column(Date, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

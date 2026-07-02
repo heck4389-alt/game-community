@@ -9,11 +9,13 @@ from starlette.middleware.sessions import SessionMiddleware
 from app.config import settings
 from app.display import display_author
 from app.routers import admin, auth, board
+from app.visitor_tracking import VisitorTrackingMiddleware
 
 BASE_DIR = Path(__file__).resolve().parent
 
 app = FastAPI(title=settings.site_name, debug=settings.debug)
 
+app.add_middleware(VisitorTrackingMiddleware)
 app.add_middleware(
     SessionMiddleware,
     secret_key=settings.secret_key,
