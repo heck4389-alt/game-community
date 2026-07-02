@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}콘텐츠 관리 - {{ site_name }}{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div>
+    <h1>공지 · 뉴스 관리</h1>
+    <p class="page-subtitle">일반 회원은 작성할 수 없습니다. 관리자만 등록·삭제 가능합니다.</p>
+  </div>
+  <a href="/admin" class="btn btn-secondary">관리자 홈</a>
+</section>
+
+<div class="admin-content-grid">
+  <section class="admin-section">
+    <h2>📢 공지사항 등록</h2>
+    <form method="post" action="/admin/announcements" class="form">
+      <label for="announcement-title">제목</label>
+      <input type="text" id="announcement-title" name="title" maxlength="200" required placeholder="예: [공지] 서비스 오픈 안내">
+
+      <label class="checkbox-row">
+        <input type="checkbox" name="is_pinned" value="1">
+        상단 고정
+      </label>
+
+      <button type="submit" class="btn btn-primary">공지 등록</button>
+    </form>
+
+    <h3 class="sub-heading">등록된 공지</h3>
+    {% if announcements %}
+      <ul class="manage-list">
+        {% for item in announcements %}
+          <li>
+            <span>{% if item.is_pinned %}📌 {% endif %}{{ item.title }}</span>
+            <form method="post" action="/admin/announcements/{{ item.id }}/delete" class="inline-form" onsubmit="return confirm('삭제할까요?');">
+              <button type="submit" class="btn btn-text danger">삭제</button>
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="empty-text">등록된 공지가 없습니다.</p>
+    {% endif %}
+  </section>
+
+  <section class="admin-section">
+    <h2>📰 게임 뉴스 등록</h2>
+    <form method="post" action="/admin/news" class="form">
+      <label for="news-title">제목</label>
+      <input type="text" id="news-title" name="title" maxlength="200" required>
+
+      <label for="news-summary">내용 요약</label>
+      <textarea id="news-summary" name="summary" rows="4" required></textarea>
+
+      <label for="news-source">출처 (선택)</label>
+      <input type="text" id="news-source" name="source" value="GAMEPRY" maxlength="100">
+
+      <button type="submit" class="btn btn-primary">뉴스 등록</button>
+    </form>
+
+    <h3 class="sub-heading">등록된 뉴스</h3>
+    {% if news_articles %}
+      <ul class="manage-list">
+        {% for item in news_articles %}
+          <li>
+            <span>{{ item.title }}</span>
+            <form method="post" action="/admin/news/{{ item.id }}/delete" class="inline-form" onsubmit="return confirm('삭제할까요?');">
+              <button type="submit" class="btn btn-text danger">삭제</button>
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="empty-text">등록된 뉴스가 없습니다.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

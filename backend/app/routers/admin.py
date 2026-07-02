@@ -1,22 +1,29 @@
 from datetime import date
 
-from fastapi import APIRouter, Request, status
+from fastapi import APIRouter, Form, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy import cast, func, select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.types import Date
 
 from app.dependencies import CurrentUser, DbSession
-from app.models import Comment, Post, User
+from app.models import Announcement, Comment, NewsArticle, Post, User
 from app.visitor_stats import get_visitor_stats
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 
-@router.get("", response_class=HTMLResponse)
-def admin_dashboard(request: Request, db: DbSession, current_user: CurrentUser):
+def require_admin(current_user: CurrentUser):
     if not current_user or not current_user.is_admin:
         return RedirectResponse("/board", status_code=status.HTTP_303_SEE_OTHER)
+    return None
+
+
+@router.get("", response_class=HTMLResponse)
+def admin_dashboard(request: Request, db: DbSession, current_user: CurrentUser):
+    redirect = require_admin(current_user)
+    if redirect:
+        return redirect
 
     today = date.today()
     user_count = db.scalar(select(func.count(User.id))) or 0
@@ -56,3 +63,100 @@ def admin_dashboard(request: Request, db: DbSession, current_user: CurrentUser):
             "recent_posts": recent_posts,
         },
     )
+
+
+@router.get("/content", response_class=HTMLResponse)
+def admin_content_page(request: Request, db: DbSession, current_user: CurrentUser):
+    redirect = require_admin(current_user)
+    if redirect:
+        return redirect
+
+    announcements = list(
+        db.scalars(select(Announcement).order_by(Announcement.is_pinned.desc(), Announcement.created_at.desc())).all()
+    )
+    news_articles = list(db.scalars(select(NewsArticle).order_by(NewsArticle.created_at.desc())).all())
+
+    return request.app.state.templates.TemplateResponse(
+        request,
+        "admin_content.html",
+        {
+            "current_user": current_user,
+            "announcements": announcements,
+            "news_articles": news_articles,
+            "error": None,
+        },
+    )
+
+
+@router.post("/announcements")
+def create_announcement(
+    request: Request,
+    db: DbSession,
+    current_user: CurrentUser,
+    title: str = Form(...),
+    is_pinned: str | None = Form(default=None),
+):
+    redirect = require_admin(current_user)
+    if redirect:
+        return redirect
+
+    title = title.strip()
+    if not title:
+        return RedirectResponse("/admin/content", status_code=status.HTTP_303_SEE_OTHER)
+
+    db.add(Announcement(title=title, is_pinned=bool(is_pinned)))
+    db.commit()
+    return RedirectResponse("/admin/content", status_code=status.HTTP_303_SEE_OTHER)
+
+
+@router.post("/announcements/{announcement_id}/delete")
+def delete_announcement(
+    announcement_id: int,
+    db: DbSession,
+    current_user: CurrentUser,
+):
+    redirect = require_admin(current_user)
+    if redirect:
+        return redirect
+
+    item = db.get(Announcement, announcement_id)
+    if item:
+        db.delete(item)
+        db.commit()
+    return RedirectResponse("/admin/content", status_code=status.HTTP_303_SEE_OTHER)
+
+
+@router.post("/news")
+def create_news(
+    request: Request,
+    db: DbSession,
+    current_user: CurrentUser,
+    title: str = Form(...),
+    summary: str = Form(...),
+    source: str = Form(default="GAMEPRY"),
+):
+    redirect = require_admin(current_user)
+    if redirect:
+        return redirect
+
+    title = title.strip()
+    summary = summary.strip()
+    if not title or not summary:
+        return RedirectResponse("/admin/content", status_code=status.HTTP_303_SEE_OTHER)
+
+    db.add(NewsArticle(title=title, summary=summary, source=source.strip() or "GAMEPRY"))
+    db.commit()
+    return RedirectResponse("/admin/content", status_code=status.HTTP_303_SEE_OTHER)
+
+
+@router.post("/news/{news_id}/delete")
+def delete_news(news_id: int, db: DbSession, current_user: CurrentUser):
+    redirect = require_admin(current_user)
+    if redirect:
+        return redirect
+
+    item = db.get(NewsArticle, news_id)
+    if item:
+        db.delete(item)
+        db.commit()
+    return RedirectResponse("/admin/content", status_code=status.HTTP_303_SEE_OTHER)

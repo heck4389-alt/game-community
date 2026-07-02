@@ -96,7 +96,12 @@
     </section>
 
     <section class="portal-card" id="news">
-      <div class="card-head"><h2>📰 게임 뉴스</h2></div>
+      <div class="card-head row">
+        <h2>📰 게임 뉴스</h2>
+        {% if current_user and current_user.is_admin %}
+          <a href="/admin/content" class="card-link">+ 뉴스 작성</a>
+        {% endif %}
+      </div>
       {% if news_articles %}
         <ul class="news-list">
           {% for news in news_articles %}
@@ -110,7 +115,7 @@
           {% endfor %}
         </ul>
       {% else %}
-        <p class="empty-text">뉴스가 없습니다.</p>
+        <p class="empty-text">등록된 뉴스가 없습니다.</p>
       {% endif %}
     </section>
 
@@ -174,18 +179,23 @@
     </section>
 
     <section class="portal-card">
-      <div class="card-head"><h2>📢 공지사항</h2></div>
+      <div class="card-head row">
+        <h2>📢 공지사항</h2>
+        {% if current_user and current_user.is_admin %}
+          <a href="/admin/content" class="card-link">+ 공지 작성</a>
+        {% endif %}
+      </div>
       {% if announcements %}
         <ul class="notice-list">
           {% for notice in announcements %}
             <li>
-              <a href="/board">{{ notice.title }}</a>
+              <span>{% if notice.is_pinned %}📌 {% endif %}{{ notice.title }}</span>
               <span>{{ notice.created_at.strftime('%m.%d') }}</span>
             </li>
           {% endfor %}
         </ul>
       {% else %}
-        <p class="empty-text">공지사항이 없습니다.</p>
+        <p class="empty-text">등록된 공지가 없습니다.</p>
       {% endif %}
     </section>
 
@@ -215,6 +225,8 @@
             <a href="{{ event.link_url }}" class="btn btn-primary btn-sm">참여하기</a>
           </div>
         {% endfor %}
+      {% else %}
+        <p class="empty-text">진행 중인 이벤트가 없습니다.</p>
       {% endif %}
     </section>
   </aside>
