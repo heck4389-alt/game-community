@@ -3,6 +3,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
+from app.categories import can_post_in_category, writable_categories
 from app.config import settings
 from app.dependencies import CurrentUser, DbSession
 from app.models import Category, Comment, Post
@@ -45,6 +46,7 @@ def board_list(
             stmt = stmt.where(Post.category_id == active_category.id)
 
     posts = list(db.scalars(stmt).all())
+    can_write = bool(current_user and (not active_category or can_post_in_category(current_user, active_category)))
     return request.app.state.templates.TemplateResponse(
         request,
         "board_list.html",
@@ -53,15 +55,34 @@ def board_list(
             "posts": posts,
             "categories": categories,
             "active_category": active_category,
+            "can_write": can_write,
         },
     )
 
 
 @router.get("/new", response_class=HTMLResponse)
-def new_post_page(request: Request, db: DbSession, current_user: CurrentUser):
+def new_post_page(
+    request: Request,
+    db: DbSession,
+    current_user: CurrentUser,
+    category: str | None = Query(default=None),
+):
     if not current_user:
         return RedirectResponse("/login", status_code=status.HTTP_303_SEE_OTHER)
-    return render_form(request, current_user=current_user, categories=get_categories(db))
+
+    categories = get_categories(db)
+    selected_category_id = None
+    if category:
+        active = db.scalar(select(Category).where(Category.slug == category))
+        if active and can_post_in_category(current_user, active):
+            selected_category_id = active.id
+
+    return render_form(
+        request,
+        current_user=current_user,
+        categories=writable_categories(categories, current_user),
+        selected_category_id=selected_category_id,
+    )
 
 
 @router.post("/new")
@@ -81,11 +102,11 @@ def create_post(
     content = content.strip()
     category = db.get(Category, category_id)
 
-    if not title or not content or not category:
+    if not title or not content or not category or not can_post_in_category(current_user, category):
         return render_form(
             request,
             current_user=current_user,
-            categories=categories,
+            categories=writable_categories(categories, current_user),
             post=None,
             error="제목, 내용, 카테고리를 모두 입력해 주세요.",
             action="create",
@@ -98,7 +119,7 @@ def create_post(
     post = Post(title=title, content=content, author_id=current_user.id, category_id=category.id)
     db.add(post)
     db.commit()
-    return RedirectResponse("/board", status_code=status.HTTP_303_SEE_OTHER)
+    return RedirectResponse(f"/board?category={category.slug}", status_code=status.HTTP_303_SEE_OTHER)
 
 
 @router.get("/{post_id}", response_class=HTMLResponse)
@@ -192,7 +213,7 @@ def edit_post_page(request: Request, post_id: int, db: DbSession, current_user: 
     return render_form(
         request,
         current_user=current_user,
-        categories=get_categories(db),
+        categories=writable_categories(get_categories(db), current_user),
         post=post,
         error=None,
         action="edit",
@@ -221,11 +242,11 @@ def update_post(
     content = content.strip()
     category = db.get(Category, category_id)
 
-    if not title or not content or not category:
+    if not title or not content or not category or not can_post_in_category(current_user, category):
         return render_form(
             request,
             current_user=current_user,
-            categories=categories,
+            categories=writable_categories(categories, current_user),
             post=post,
             error="제목, 내용, 카테고리를 모두 입력해 주세요.",
             action="edit",

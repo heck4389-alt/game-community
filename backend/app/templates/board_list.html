@@ -8,8 +8,8 @@
     <h1>게시판</h1>
     <p class="page-subtitle">궁금한 것, 공략, 팁을 카테고리별로 나눠 올려보세요.</p>
   </div>
-  {% if current_user %}
-    <a href="/board/new" class="btn btn-primary">글쓰기</a>
+  {% if current_user and can_write %}
+    <a href="/board/new{% if active_category %}?category={{ active_category.slug }}{% endif %}" class="btn btn-primary">글쓰기</a>
   {% endif %}
 </section>
 
@@ -44,8 +44,10 @@
 {% else %}
   <div class="empty-state">
     <p>{% if active_category %}{{ active_category.name }}에 아직 글이 없습니다.{% else %}아직 게시글이 없습니다.{% endif %}</p>
-    {% if current_user %}
-      <a href="/board/new" class="btn btn-primary">첫 글 작성하기</a>
+    {% if current_user and can_write %}
+      <a href="/board/new{% if active_category %}?category={{ active_category.slug }}{% endif %}" class="btn btn-primary">첫 글 작성하기</a>
+    {% elif active_category and active_category.slug == 'notice' %}
+      <p>공지 게시판은 관리자만 글을 작성할 수 있습니다.</p>
     {% else %}
       <p>글을 작성하려면 <a href="/login">로그인</a>이 필요합니다.</p>
     {% endif %}

@@ -17,6 +17,7 @@ from app.models import (
     SiteEvent,
     User,
 )
+from app.categories import GUIDE_SLUG, NON_GAME_SLUGS, NOTICE_SLUG
 from app.visitor_stats import get_visitor_stats
 
 POST_WEIGHT = 3
@@ -63,7 +64,7 @@ def get_today_stats(db: Session) -> dict[str, int]:
 def get_popular_games(db: Session, limit: int = 10) -> list[PopularGame]:
     since = since_24h()
     categories = list(
-        db.scalars(select(Category).where(Category.slug != "free").order_by(Category.sort_order)).all()
+        db.scalars(select(Category).where(Category.slug.notin_(NON_GAME_SLUGS)).order_by(Category.sort_order)).all()
     )
 
     results: list[PopularGame] = []
@@ -138,7 +139,9 @@ def _attach_post_metrics(db: Session, posts: list[Post]) -> list[HotPostItem]:
 def get_hot_posts(db: Session, tab: str = "all", limit: int = 8) -> list[HotPostItem]:
     stmt = (
         select(Post)
+        .join(Category)
         .options(selectinload(Post.author), selectinload(Post.category), selectinload(Post.comments))
+        .where(Category.slug != NOTICE_SLUG)
         .order_by(Post.created_at.desc())
         .limit(30)
     )
@@ -162,8 +165,9 @@ def get_recommended_guides(db: Session, limit: int = 3) -> list[HotPostItem]:
     posts = list(
         db.scalars(
             select(Post)
+            .join(Category)
             .options(selectinload(Post.author), selectinload(Post.category), selectinload(Post.comments))
-            .where(Post.created_at >= since - timedelta(days=7))
+            .where(Category.slug == GUIDE_SLUG, Post.created_at >= since - timedelta(days=7))
             .order_by(Post.created_at.desc())
             .limit(20)
         ).all()

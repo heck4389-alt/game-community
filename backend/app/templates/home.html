@@ -120,7 +120,10 @@
     </section>
 
     <section class="portal-card">
-      <div class="card-head"><h2>⭐ 오늘의 추천 공략</h2></div>
+      <div class="card-head row">
+        <h2>⭐ 오늘의 추천 공략</h2>
+        <a href="/board?category=guide" class="card-link">공략 게시판</a>
+      </div>
       {% if recommended_guides %}
         <div class="guide-grid">
           {% for item in recommended_guides %}
@@ -133,7 +136,7 @@
           {% endfor %}
         </div>
       {% else %}
-        <p class="empty-text">추천 공략이 없습니다. 조회·댓글이 많은 글이 자동 추천됩니다.</p>
+        <p class="empty-text">공략 게시판에 글을 작성하면 조회·댓글이 많은 글이 자동 추천됩니다.</p>
       {% endif %}
     </section>
 
