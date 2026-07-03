@@ -34,13 +34,14 @@ def upgrade() -> None:
                 """
                 INSERT INTO categories (id, name, slug, icon, sort_order)
                 SELECT :id, :name, :slug, :icon, :sort_order
-                WHERE NOT EXISTS (SELECT 1 FROM categories WHERE slug = :slug)
+                WHERE NOT EXISTS (SELECT 1 FROM categories WHERE slug = :slug_check)
                 """
             ),
             {
                 "id": next_id + offset,
                 "name": name,
                 "slug": slug,
+                "slug_check": slug,
                 "icon": icon,
                 "sort_order": sort_order,
             },
