@@ -6,7 +6,7 @@
 <section class="page-header">
   <div>
     <h1>공지 · 뉴스 관리</h1>
-    <p class="page-subtitle">일반 회원은 작성할 수 없습니다. 관리자만 등록·삭제 가능합니다.</p>
+    <p class="page-subtitle">일반 회원은 작성할 수 없습니다. 관리자만 등록·수정·삭제 가능합니다.</p>
   </div>
   <a href="/admin" class="btn btn-secondary">관리자 홈</a>
 </section>
@@ -35,9 +35,12 @@
         {% for item in announcements %}
           <li>
             <span>{% if item.is_pinned %}📌 {% endif %}{{ item.title }}</span>
-            <form method="post" action="/admin/announcements/{{ item.id }}/delete" class="inline-form" onsubmit="return confirm('삭제할까요?');">
-              <button type="submit" class="btn btn-text danger">삭제</button>
-            </form>
+            <div class="manage-actions">
+              <a href="/admin/announcements/{{ item.id }}/edit" class="btn btn-text">수정</a>
+              <form method="post" action="/admin/announcements/{{ item.id }}/delete" class="inline-form" onsubmit="return confirm('삭제할까요?');">
+                <button type="submit" class="btn btn-text danger">삭제</button>
+              </form>
+            </div>
           </li>
         {% endfor %}
       </ul>

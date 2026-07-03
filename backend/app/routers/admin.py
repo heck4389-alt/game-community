@@ -111,6 +111,60 @@ def create_announcement(
     return RedirectResponse("/admin/content", status_code=status.HTTP_303_SEE_OTHER)
 
 
+@router.get("/announcements/{announcement_id}/edit", response_class=HTMLResponse)
+def edit_announcement_page(
+    request: Request,
+    announcement_id: int,
+    db: DbSession,
+    current_user: CurrentUser,
+):
+    redirect = require_admin(current_user)
+    if redirect:
+        return redirect
+
+    announcement = db.get(Announcement, announcement_id)
+    if not announcement:
+        return RedirectResponse("/admin/content", status_code=status.HTTP_303_SEE_OTHER)
+
+    return request.app.state.templates.TemplateResponse(
+        request,
+        "admin_announcement_edit.html",
+        {"current_user": current_user, "announcement": announcement, "error": None},
+    )
+
+
+@router.post("/announcements/{announcement_id}/edit")
+def update_announcement(
+    announcement_id: int,
+    db: DbSession,
+    current_user: CurrentUser,
+    title: str = Form(...),
+    content: str = Form(...),
+    is_pinned: str | None = Form(default=None),
+):
+    redirect = require_admin(current_user)
+    if redirect:
+        return redirect
+
+    announcement = db.get(Announcement, announcement_id)
+    if not announcement:
+        return RedirectResponse("/admin/content", status_code=status.HTTP_303_SEE_OTHER)
+
+    title = title.strip()
+    content = content.strip()
+    if not title or not content:
+        return RedirectResponse(
+            f"/admin/announcements/{announcement_id}/edit",
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    announcement.title = title
+    announcement.content = content
+    announcement.is_pinned = bool(is_pinned)
+    db.commit()
+    return RedirectResponse("/admin/content", status_code=status.HTTP_303_SEE_OTHER)
+
+
 @router.post("/announcements/{announcement_id}/delete")
 def delete_announcement(
     announcement_id: int,

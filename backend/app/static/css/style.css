@@ -148,6 +148,13 @@ a:hover {
   font-size: 0.9rem;
 }
 
+.manage-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
 .checkbox-row {
   display: flex;
   align-items: center;
