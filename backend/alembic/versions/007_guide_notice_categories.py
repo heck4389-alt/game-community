@@ -20,20 +20,39 @@ def upgrade() -> None:
     conn.execute(
         sa.text("UPDATE categories SET sort_order = sort_order + 2 WHERE slug NOT IN ('guide', 'notice')")
     )
-    for name, slug, icon, sort_order in [
-        ("공략", "guide", "⭐", 1),
-        ("공지", "notice", "📢", 2),
-    ]:
+
+    next_id = conn.execute(sa.text("SELECT COALESCE(MAX(id), 0) FROM categories")).scalar() or 0
+    for offset, (name, slug, icon, sort_order) in enumerate(
+        [
+            ("공략", "guide", "⭐", 1),
+            ("공지", "notice", "📢", 2),
+        ],
+        start=1,
+    ):
         conn.execute(
             sa.text(
                 """
-                INSERT INTO categories (name, slug, icon, sort_order)
-                SELECT :name, :slug, :icon, :sort_order
+                INSERT INTO categories (id, name, slug, icon, sort_order)
+                SELECT :id, :name, :slug, :icon, :sort_order
                 WHERE NOT EXISTS (SELECT 1 FROM categories WHERE slug = :slug)
                 """
             ),
-            {"name": name, "slug": slug, "icon": icon, "sort_order": sort_order},
+            {
+                "id": next_id + offset,
+                "name": name,
+                "slug": slug,
+                "icon": icon,
+                "sort_order": sort_order,
+            },
         )
+
+    conn.execute(sa.text("CREATE SEQUENCE IF NOT EXISTS categories_id_seq"))
+    conn.execute(
+        sa.text(
+            "SELECT setval('categories_id_seq', GREATEST((SELECT COALESCE(MAX(id), 1) FROM categories), 1))"
+        )
+    )
+    conn.execute(sa.text("ALTER TABLE categories ALTER COLUMN id SET DEFAULT nextval('categories_id_seq')"))
 
 
 def downgrade() -> None:
