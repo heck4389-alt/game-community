@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}{{ announcement.title }} - {{ site_name }}{% endblock %}
+
+{% block content %}
+<article class="post-detail">
+  <header>
+  {% if announcement.is_pinned %}<span class="category-badge">📌 고정 공지</span>{% endif %}
+    <h1>{{ announcement.title }}</h1>
+    <p class="meta">{{ announcement.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+  </header>
+
+  <div class="post-content">{{ announcement.content }}</div>
+
+  <div class="form-actions">
+    <a href="/" class="btn btn-secondary">홈으로</a>
+  </div>
+</article>
+{% endblock %}

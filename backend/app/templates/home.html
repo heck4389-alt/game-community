@@ -189,7 +189,9 @@
         <ul class="notice-list">
           {% for notice in announcements %}
             <li>
-              <span>{% if notice.is_pinned %}📌 {% endif %}{{ notice.title }}</span>
+              <a href="/announcements/{{ notice.id }}" class="notice-link">
+                {% if notice.is_pinned %}📌 {% endif %}{{ notice.title }}
+              </a>
               <span>{{ notice.created_at.strftime('%m.%d') }}</span>
             </li>
           {% endfor %}

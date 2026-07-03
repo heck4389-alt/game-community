@@ -428,9 +428,15 @@
   font-size: 0.85rem;
 }
 
-.notice-list a {
+.notice-list a,
+.notice-link {
   color: #e2e8f0;
   flex: 1;
+  text-decoration: none;
+}
+
+.notice-link:hover {
+  color: #818cf8;
 }
 
 .user-list .avatar {

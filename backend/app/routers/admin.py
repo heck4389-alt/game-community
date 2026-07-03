@@ -94,6 +94,7 @@ def create_announcement(
     db: DbSession,
     current_user: CurrentUser,
     title: str = Form(...),
+    content: str = Form(...),
     is_pinned: str | None = Form(default=None),
 ):
     redirect = require_admin(current_user)
@@ -101,10 +102,11 @@ def create_announcement(
         return redirect
 
     title = title.strip()
-    if not title:
+    content = content.strip()
+    if not title or not content:
         return RedirectResponse("/admin/content", status_code=status.HTTP_303_SEE_OTHER)
 
-    db.add(Announcement(title=title, is_pinned=bool(is_pinned)))
+    db.add(Announcement(title=title, content=content, is_pinned=bool(is_pinned)))
     db.commit()
     return RedirectResponse("/admin/content", status_code=status.HTTP_303_SEE_OTHER)
 

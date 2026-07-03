@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Query, Request
-from fastapi.responses import HTMLResponse
+from fastapi import APIRouter, Query, Request, status
+from fastapi.responses import HTMLResponse, RedirectResponse
+from sqlalchemy import select
 
-from app.config import settings
 from app.dependencies import CurrentUser, DbSession
+from app.models import Announcement
 from app.services.home import (
     get_announcements,
     get_banners,
@@ -45,4 +46,17 @@ def home_page(
             "recent_users": get_recent_users(db),
             "today_stats": get_today_stats(db),
         },
+    )
+
+
+@router.get("/announcements/{announcement_id}", response_class=HTMLResponse)
+def announcement_detail(request: Request, announcement_id: int, db: DbSession, current_user: CurrentUser):
+    announcement = db.get(Announcement, announcement_id)
+    if not announcement:
+        return RedirectResponse("/", status_code=status.HTTP_303_SEE_OTHER)
+
+    return request.app.state.templates.TemplateResponse(
+        request,
+        "announcement_detail.html",
+        {"current_user": current_user, "announcement": announcement},
     )
